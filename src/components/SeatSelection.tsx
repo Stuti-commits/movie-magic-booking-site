@@ -22,14 +22,14 @@ interface SeatSelectionProps {
 }
 
 const seatLayout = [
-  { row: 'A', seats: 12, price: 15 },
-  { row: 'B', seats: 12, price: 15 },
-  { row: 'C', seats: 14, price: 18 },
-  { row: 'D', seats: 14, price: 18 },
-  { row: 'E', seats: 14, price: 18 },
-  { row: 'F', seats: 16, price: 22 },
-  { row: 'G', seats: 16, price: 22 },
-  { row: 'H', seats: 16, price: 22 },
+  { row: 'A', seats: 12, price: 250 },
+  { row: 'B', seats: 12, price: 250 },
+  { row: 'C', seats: 14, price: 300 },
+  { row: 'D', seats: 14, price: 300 },
+  { row: 'E', seats: 14, price: 300 },
+  { row: 'F', seats: 16, price: 350 },
+  { row: 'G', seats: 16, price: 350 },
+  { row: 'H', seats: 16, price: 350 },
 ];
 
 const occupiedSeats = ['C5', 'C6', 'F8', 'F9', 'F10', 'G7', 'H12', 'H13'];
@@ -130,7 +130,7 @@ export const SeatSelection = ({ movie, showtime, onConfirm, onBack }: SeatSelect
                       );
                     })}
                   </div>
-                  <span className="text-gray-400 text-sm w-16 text-left">${rowData.price}</span>
+                  <span className="text-gray-400 text-sm w-16 text-left">₹{rowData.price}</span>
                 </div>
               ))}
             </div>
@@ -169,7 +169,7 @@ export const SeatSelection = ({ movie, showtime, onConfirm, onBack }: SeatSelect
                 <div className="text-right">
                   <div className="flex items-center space-x-2 text-green-400 text-2xl font-bold">
                     <Banknote className="w-6 h-6" />
-                    <span>${calculateTotal()}</span>
+                    <span>₹{calculateTotal()}</span>
                   </div>
                   <p className="text-gray-400 text-sm">Total Amount</p>
                 </div>

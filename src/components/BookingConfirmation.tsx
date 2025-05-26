@@ -22,7 +22,18 @@ interface BookingConfirmationProps {
 
 export const BookingConfirmation = ({ movie, showtime, seats, onNewBooking }: BookingConfirmationProps) => {
   const bookingId = `BK${Date.now().toString().slice(-6)}`;
-  const totalAmount = seats.length * 20; // Simplified calculation
+  
+  // Calculate total based on seat pricing
+  const seatPricing = {
+    'A': 250, 'B': 250,
+    'C': 300, 'D': 300, 'E': 300,
+    'F': 350, 'G': 350, 'H': 350
+  };
+  
+  const totalAmount = seats.reduce((total, seat) => {
+    const row = seat[0] as keyof typeof seatPricing;
+    return total + (seatPricing[row] || 250);
+  }, 0);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center p-4">
@@ -77,7 +88,7 @@ export const BookingConfirmation = ({ movie, showtime, seats, onNewBooking }: Bo
                   <MapPin className="w-5 h-5 text-purple-400" />
                   <div>
                     <p className="text-sm text-gray-400">Cinema</p>
-                    <p className="text-white font-medium">Downtown Cinema - Screen 1</p>
+                    <p className="text-white font-medium">PVR Forum Mall - Screen 1, Bangalore</p>
                   </div>
                 </div>
               </div>
@@ -101,7 +112,7 @@ export const BookingConfirmation = ({ movie, showtime, seats, onNewBooking }: Bo
                 
                 <div className="bg-green-500/20 rounded-lg p-4 border border-green-500/30">
                   <p className="text-sm text-green-400 mb-1">Total Paid</p>
-                  <p className="text-2xl font-bold text-green-400">${totalAmount}</p>
+                  <p className="text-2xl font-bold text-green-400">₹{totalAmount}</p>
                 </div>
               </div>
             </div>

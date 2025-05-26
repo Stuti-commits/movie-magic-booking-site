@@ -108,7 +108,7 @@ const Index = () => {
                   <div className="flex items-center space-x-6 text-gray-300">
                     <span className="flex items-center space-x-2">
                       <MapPin className="w-4 h-4" />
-                      <span>Downtown Cinema</span>
+                      <span>PVR Forum Mall, Bangalore</span>
                     </span>
                     <span className="flex items-center space-x-2">
                       <Calendar className="w-4 h-4" />
@@ -129,7 +129,7 @@ const Index = () => {
                   </h2>
                   <p className="text-xl text-gray-300 mb-8 leading-relaxed">
                     Book your favorite movies with premium seats and immersive sound. 
-                    Discover the magic of cinema in our state-of-the-art theaters.
+                    Discover the magic of cinema in our state-of-the-art theaters in Bangalore.
                   </p>
                   <div className="flex items-center space-x-4">
                     <div className="bg-white/10 backdrop-blur-md rounded-lg p-4 border border-white/20">
