@@ -1,6 +1,9 @@
 
+import { useEffect } from 'react';
 import { CheckCircle, Calendar, Clock, MapPin, Users, Ticket } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
 interface Movie {
   id: number;
@@ -18,10 +21,12 @@ interface BookingConfirmationProps {
   showtime: string;
   seats: string[];
   onNewBooking: () => void;
+  user?: any;
 }
 
-export const BookingConfirmation = ({ movie, showtime, seats, onNewBooking }: BookingConfirmationProps) => {
+export const BookingConfirmation = ({ movie, showtime, seats, onNewBooking, user }: BookingConfirmationProps) => {
   const bookingId = `BK${Date.now().toString().slice(-6)}`;
+  const { toast } = useToast();
   
   // Calculate total based on seat pricing
   const seatPricing = {
@@ -34,6 +39,39 @@ export const BookingConfirmation = ({ movie, showtime, seats, onNewBooking }: Bo
     const row = seat[0] as keyof typeof seatPricing;
     return total + (seatPricing[row] || 250);
   }, 0);
+
+  // Save booking to database
+  useEffect(() => {
+    const saveBooking = async () => {
+      if (!user) return;
+
+      const { error } = await supabase
+        .from('bookings')
+        .insert({
+          user_id: user.id,
+          booking_id: bookingId,
+          movie_title: movie.title,
+          movie_genre: movie.genre,
+          showtime: showtime,
+          seats: seats,
+          total_amount: totalAmount,
+          cinema_location: 'PVR Forum Mall - Screen 1, Bangalore'
+        });
+
+      if (error) {
+        console.error('Error saving booking:', error);
+        toast({
+          title: "Warning",
+          description: "Booking confirmed but failed to save to database",
+          variant: "destructive",
+        });
+      } else {
+        console.log('Booking saved successfully');
+      }
+    };
+
+    saveBooking();
+  }, [user, bookingId, movie, showtime, seats, totalAmount, toast]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center p-4">
