@@ -9,7 +9,86 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      bookings: {
+        Row: {
+          booking_date: string | null
+          booking_id: string
+          cinema_location: string
+          created_at: string | null
+          id: string
+          movie_genre: string
+          movie_title: string
+          seats: string[]
+          showtime: string
+          status: string | null
+          total_amount: number
+          user_id: string
+        }
+        Insert: {
+          booking_date?: string | null
+          booking_id: string
+          cinema_location: string
+          created_at?: string | null
+          id?: string
+          movie_genre: string
+          movie_title: string
+          seats: string[]
+          showtime: string
+          status?: string | null
+          total_amount: number
+          user_id: string
+        }
+        Update: {
+          booking_date?: string | null
+          booking_id?: string
+          cinema_location?: string
+          created_at?: string | null
+          id?: string
+          movie_genre?: string
+          movie_title?: string
+          seats?: string[]
+          showtime?: string
+          status?: string | null
+          total_amount?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
+      feedback: {
+        Row: {
+          booking_id: string
+          comments: string | null
+          created_at: string | null
+          id: string
+          rating: number
+          user_id: string
+        }
+        Insert: {
+          booking_id: string
+          comments?: string | null
+          created_at?: string | null
+          id?: string
+          rating: number
+          user_id: string
+        }
+        Update: {
+          booking_id?: string
+          comments?: string | null
+          created_at?: string | null
+          id?: string
+          rating?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feedback_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never

@@ -1,3 +1,4 @@
+
 import { useEffect } from 'react';
 import { CheckCircle, Calendar, Clock, MapPin, Users, Ticket } from 'lucide-react';
 import { Button } from '@/components/ui/button';

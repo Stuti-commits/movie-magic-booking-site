@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { User as UserType, Session } from '@supabase/supabase-js';
+import { User as SupabaseUser, Session } from '@supabase/supabase-js';
 import { 
   LogOut, 
   Ticket, 
@@ -48,7 +48,7 @@ interface Feedback {
 }
 
 export const UserProfile = ({ onLogout }: UserProfileProps) => {
-  const [user, setUser] = useState<UserType | null>(null);
+  const [user, setUser] = useState<SupabaseUser | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [feedbacks, setFeedbacks] = useState<Feedback[]>([]);
