@@ -4,6 +4,7 @@ import { Calendar, Clock, Star, MapPin } from 'lucide-react';
 import { MovieCard } from '@/components/MovieCard';
 import { SeatSelection } from '@/components/SeatSelection';
 import { BookingConfirmation } from '@/components/BookingConfirmation';
+import { AuthPage } from '@/components/AuthPage';
 
 const movies = [
   {
@@ -52,7 +53,7 @@ const Index = () => {
   const [selectedMovie, setSelectedMovie] = useState<typeof movies[0] | null>(null);
   const [selectedShowtime, setSelectedShowtime] = useState<string>("");
   const [selectedSeats, setSelectedSeats] = useState<string[]>([]);
-  const [currentStep, setCurrentStep] = useState<'movies' | 'seats' | 'confirmation'>('movies');
+  const [currentStep, setCurrentStep] = useState<'movies' | 'seats' | 'confirmation' | 'auth'>('movies');
 
   const handleMovieSelect = (movie: typeof movies[0], showtime: string) => {
     setSelectedMovie(movie);
@@ -72,8 +73,18 @@ const Index = () => {
     setSelectedSeats([]);
   };
 
+  const handleSignInClick = () => {
+    setCurrentStep('auth');
+  };
+
+  const handleAuthSuccess = () => {
+    setCurrentStep('movies');
+  };
+
   const renderCurrentStep = () => {
     switch (currentStep) {
+      case 'auth':
+        return <AuthPage onAuthSuccess={handleAuthSuccess} />;
       case 'seats':
         return selectedMovie ? (
           <SeatSelection
@@ -106,15 +117,23 @@ const Index = () => {
                     </div>
                     <h1 className="text-3xl font-bold text-white">CinemaMax</h1>
                   </div>
-                  <div className="flex items-center space-x-6 text-gray-300">
-                    <span className="flex items-center space-x-2">
-                      <MapPin className="w-4 h-4" />
-                      <span>PVR Forum Mall, Bangalore</span>
-                    </span>
-                    <span className="flex items-center space-x-2">
-                      <Calendar className="w-4 h-4" />
-                      <span>Today</span>
-                    </span>
+                  <div className="flex items-center space-x-6">
+                    <div className="flex items-center space-x-6 text-gray-300">
+                      <span className="flex items-center space-x-2">
+                        <MapPin className="w-4 h-4" />
+                        <span>PVR Forum Mall, Bangalore</span>
+                      </span>
+                      <span className="flex items-center space-x-2">
+                        <Calendar className="w-4 h-4" />
+                        <span>Today</span>
+                      </span>
+                    </div>
+                    <button
+                      onClick={handleSignInClick}
+                      className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white px-4 py-2 rounded-lg font-medium transition-all duration-200"
+                    >
+                      Sign In
+                    </button>
                   </div>
                 </div>
               </div>
@@ -150,7 +169,6 @@ const Index = () => {
               </div>
             </section>
 
-            {/* Movies Section */}
             <section className="py-16">
               <div className="container mx-auto px-4">
                 <div className="text-center mb-12">
@@ -170,7 +188,6 @@ const Index = () => {
               </div>
             </section>
 
-            {/* Features Section */}
             <section className="py-16 bg-black/20">
               <div className="container mx-auto px-4">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">

@@ -1,6 +1,5 @@
 
 import { useState } from 'react';
-import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -33,74 +32,30 @@ export const AuthPage = ({ onAuthSuccess }: AuthPageProps) => {
     e.preventDefault();
     setIsLoading(true);
 
-    try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email: formData.email,
-        password: formData.password,
-      });
-
-      if (error) {
-        toast({
-          title: "Error",
-          description: error.message,
-          variant: "destructive",
-        });
-      } else {
-        toast({
-          title: "Success",
-          description: "Signed in successfully!",
-        });
-        onAuthSuccess();
-      }
-    } catch (error) {
+    // Simulate loading for demo purposes
+    setTimeout(() => {
       toast({
-        title: "Error",
-        description: "An unexpected error occurred",
-        variant: "destructive",
+        title: "Demo Mode",
+        description: "Authentication is disabled. Proceeding without login.",
       });
-    } finally {
       setIsLoading(false);
-    }
+      onAuthSuccess();
+    }, 1000);
   };
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
-    try {
-      const { error } = await supabase.auth.signUp({
-        email: formData.email,
-        password: formData.password,
-        options: {
-          data: {
-            full_name: formData.fullName,
-            phone: formData.phone,
-          }
-        }
-      });
-
-      if (error) {
-        toast({
-          title: "Error",
-          description: error.message,
-          variant: "destructive",
-        });
-      } else {
-        toast({
-          title: "Success",
-          description: "Account created successfully! Please check your email for verification.",
-        });
-        setIsSignUp(false);
-      }
-    } catch (error) {
+    // Simulate loading for demo purposes
+    setTimeout(() => {
       toast({
-        title: "Error",
-        description: "An unexpected error occurred",
-        variant: "destructive",
+        title: "Demo Mode",
+        description: "Account creation is disabled. Proceeding without signup.",
       });
-    } finally {
       setIsLoading(false);
-    }
+      onAuthSuccess();
+    }, 1000);
   };
 
   return (
