@@ -1,150 +1,210 @@
 
+import { useEffect } from 'react';
 import { CheckCircle, Calendar, Clock, MapPin, Users, Ticket } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
+
+interface Movie {
+  id: number;
+  title: string;
+  rating: number;
+  genre: string;
+  duration: string;
+  image: string;
+  showtimes: string[];
+  description: string;
+}
 
 interface BookingConfirmationProps {
-  movie: {
-    title: string;
-    genre: string;
-    duration: string;
-    image: string;
-  };
+  movie: Movie;
   showtime: string;
   seats: string[];
   onNewBooking: () => void;
-  user: any;
+  user?: any;
 }
 
-export const BookingConfirmation = ({ 
-  movie, 
-  showtime, 
-  seats, 
-  onNewBooking 
-}: BookingConfirmationProps) => {
-  const totalAmount = seats.length * 250; // ₹250 per seat
+export const BookingConfirmation = ({ movie, showtime, seats, onNewBooking, user }: BookingConfirmationProps) => {
   const bookingId = `BK${Date.now().toString().slice(-6)}`;
+  const { toast } = useToast();
+  
+  // Calculate total based on seat pricing
+  const seatPricing = {
+    'A': 250, 'B': 250,
+    'C': 300, 'D': 300, 'E': 300,
+    'F': 350, 'G': 350, 'H': 350
+  };
+  
+  const totalAmount = seats.reduce((total, seat) => {
+    const row = seat[0] as keyof typeof seatPricing;
+    return total + (seatPricing[row] || 250);
+  }, 0);
+
+  // Save booking to database
+  useEffect(() => {
+    const saveBooking = async () => {
+      if (!user) return;
+
+      try {
+        const { error } = await supabase
+          .from('bookings')
+          .insert({
+            user_id: user.id,
+            booking_id: bookingId,
+            movie_title: movie.title,
+            movie_genre: movie.genre,
+            showtime: showtime,
+            seats: seats,
+            total_amount: totalAmount,
+            cinema_location: 'PVR Forum Mall - Screen 1, Bangalore'
+          });
+
+        if (error) {
+          console.error('Error saving booking:', error);
+          toast({
+            title: "Warning",
+            description: "Booking confirmed but failed to save to database",
+            variant: "destructive",
+          });
+        } else {
+          console.log('Booking saved successfully');
+        }
+      } catch (error) {
+        console.error('Error in saveBooking:', error);
+      }
+    };
+
+    saveBooking();
+  }, [user, bookingId, movie, showtime, seats, totalAmount, toast]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center p-4">
-      <Card className="w-full max-w-2xl bg-white/10 backdrop-blur-md border-white/20">
-        <CardHeader className="text-center">
-          <div className="mx-auto mb-4 w-16 h-16 bg-green-500 rounded-full flex items-center justify-center">
-            <CheckCircle className="w-8 h-8 text-white" />
+      <div className="max-w-2xl w-full">
+        {/* Success Animation */}
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center justify-center w-24 h-24 bg-green-500/20 rounded-full mb-6 animate-scale-in">
+            <CheckCircle className="w-12 h-12 text-green-400" />
           </div>
-          <CardTitle className="text-2xl font-bold text-white">Booking Confirmed!</CardTitle>
-          <CardDescription className="text-gray-300">
-            Your movie tickets have been successfully booked
-          </CardDescription>
-        </CardHeader>
-        
-        <CardContent className="space-y-6">
-          {/* Booking Details */}
-          <div className="bg-white/5 rounded-lg p-6 border border-white/10">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-white">Booking Details</h3>
-              <Badge variant="secondary" className="bg-green-500/20 text-green-400 border-green-500/30">
-                Confirmed
-              </Badge>
+          <h1 className="text-4xl font-bold text-white mb-2">Booking Confirmed!</h1>
+          <p className="text-gray-300 text-lg">Your tickets have been successfully booked</p>
+        </div>
+
+        {/* Ticket */}
+        <div className="bg-white/10 backdrop-blur-md rounded-xl border border-white/20 overflow-hidden mb-8">
+          {/* Ticket Header */}
+          <div className="bg-gradient-to-r from-yellow-500 to-red-500 p-6 text-black">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-2xl font-bold">{movie.title}</h2>
+                <p className="text-black/80">{movie.genre}</p>
+              </div>
+              <div className="text-right">
+                <p className="text-sm font-medium">Booking ID</p>
+                <p className="text-xl font-bold">{bookingId}</p>
+              </div>
             </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-3">
-                <div className="flex items-center space-x-3">
-                  <Ticket className="w-5 h-5 text-blue-400" />
+          </div>
+
+          {/* Ticket Body */}
+          <div className="p-6 space-y-6">
+            {/* Movie Details */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-4">
+                <div className="flex items-center space-x-3 text-gray-300">
+                  <Calendar className="w-5 h-5 text-blue-400" />
                   <div>
-                    <p className="text-gray-300 text-sm">Booking ID</p>
-                    <p className="text-white font-semibold">{bookingId}</p>
+                    <p className="text-sm text-gray-400">Date</p>
+                    <p className="text-white font-medium">Today</p>
                   </div>
                 </div>
                 
-                <div className="flex items-center space-x-3">
-                  <Calendar className="w-5 h-5 text-purple-400" />
-                  <div>
-                    <p className="text-gray-300 text-sm">Date</p>
-                    <p className="text-white font-semibold">Today</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-center space-x-3">
+                <div className="flex items-center space-x-3 text-gray-300">
                   <Clock className="w-5 h-5 text-green-400" />
                   <div>
-                    <p className="text-gray-300 text-sm">Show Time</p>
-                    <p className="text-white font-semibold">{showtime}</p>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="space-y-3">
-                <div className="flex items-center space-x-3">
-                  <MapPin className="w-5 h-5 text-red-400" />
-                  <div>
-                    <p className="text-gray-300 text-sm">Cinema</p>
-                    <p className="text-white font-semibold">PVR Forum Mall, Bangalore</p>
+                    <p className="text-sm text-gray-400">Showtime</p>
+                    <p className="text-white font-medium">{showtime}</p>
                   </div>
                 </div>
                 
-                <div className="flex items-center space-x-3">
+                <div className="flex items-center space-x-3 text-gray-300">
+                  <MapPin className="w-5 h-5 text-purple-400" />
+                  <div>
+                    <p className="text-sm text-gray-400">Cinema</p>
+                    <p className="text-white font-medium">PVR Forum Mall - Screen 1, Bangalore</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <div className="flex items-center space-x-3 text-gray-300">
                   <Users className="w-5 h-5 text-yellow-400" />
                   <div>
-                    <p className="text-gray-300 text-sm">Seats</p>
-                    <p className="text-white font-semibold">{seats.join(', ')}</p>
+                    <p className="text-sm text-gray-400">Seats</p>
+                    <p className="text-white font-medium">{seats.join(', ')}</p>
                   </div>
                 </div>
                 
-                <div className="flex items-center space-x-3">
-                  <div className="w-5 h-5 bg-green-500 rounded-full flex items-center justify-center">
-                    <span className="text-white text-xs">₹</span>
-                  </div>
+                <div className="flex items-center space-x-3 text-gray-300">
+                  <Ticket className="w-5 h-5 text-red-400" />
                   <div>
-                    <p className="text-gray-300 text-sm">Total Amount</p>
-                    <p className="text-white font-semibold">₹{totalAmount}</p>
+                    <p className="text-sm text-gray-400">Tickets</p>
+                    <p className="text-white font-medium">{seats.length} x Adult</p>
                   </div>
+                </div>
+                
+                <div className="bg-green-500/20 rounded-lg p-4 border border-green-500/30">
+                  <p className="text-sm text-green-400 mb-1">Total Paid</p>
+                  <p className="text-2xl font-bold text-green-400">₹{totalAmount}</p>
                 </div>
               </div>
             </div>
-          </div>
-          
-          {/* Movie Details */}
-          <div className="bg-white/5 rounded-lg p-6 border border-white/10">
-            <h3 className="text-lg font-semibold text-white mb-4">Movie Details</h3>
-            <div className="flex items-start space-x-4">
-              <img 
-                src={movie.image} 
-                alt={movie.title}
-                className="w-24 h-36 object-cover rounded-lg"
-              />
-              <div className="flex-1">
-                <h4 className="text-xl font-bold text-white mb-2">{movie.title}</h4>
-                <p className="text-gray-300 mb-1">{movie.genre}</p>
-                <p className="text-gray-400 text-sm">{movie.duration}</p>
+
+            {/* QR Code Placeholder */}
+            <div className="text-center py-6 border-t border-white/10">
+              <div className="inline-block bg-white p-4 rounded-lg mb-4">
+                <div className="w-32 h-32 bg-black rounded grid grid-cols-8 gap-1 p-2">
+                  {Array.from({ length: 64 }, (_, i) => (
+                    <div
+                      key={i}
+                      className={`rounded-sm ${Math.random() > 0.5 ? 'bg-white' : 'bg-black'}`}
+                    />
+                  ))}
+                </div>
               </div>
+              <p className="text-gray-400 text-sm">Show this QR code at the cinema entrance</p>
             </div>
           </div>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="flex flex-col sm:flex-row gap-4">
+          <Button
+            onClick={onNewBooking}
+            className="flex-1 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-bold py-4 text-lg transition-all duration-300"
+          >
+            Book Another Movie
+          </Button>
           
-          {/* Action Buttons */}
-          <div className="flex flex-col sm:flex-row gap-3">
-            <Button 
-              onClick={onNewBooking}
-              className="flex-1 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600"
-            >
-              Book Another Movie
-            </Button>
-          </div>
-          
-          {/* Important Notes */}
-          <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-4">
-            <h4 className="text-yellow-400 font-semibold mb-2">Important Notes:</h4>
-            <ul className="text-gray-300 text-sm space-y-1">
-              <li>• Please arrive at least 15 minutes before the show time</li>
-              <li>• Carry a valid ID proof for verification</li>
-              <li>• Outside food and beverages are not allowed</li>
-              <li>• This booking is non-refundable and non-transferable</li>
-            </ul>
-          </div>
-        </CardContent>
-      </Card>
+          <Button
+            variant="outline"
+            className="flex-1 border-white/20 text-white hover:bg-white/10 py-4 text-lg"
+            onClick={() => window.print()}
+          >
+            Download Ticket
+          </Button>
+        </div>
+
+        {/* Additional Info */}
+        <div className="mt-8 p-6 bg-blue-500/10 rounded-xl border border-blue-500/20">
+          <h3 className="text-lg font-bold text-white mb-3">Important Information</h3>
+          <ul className="space-y-2 text-gray-300 text-sm">
+            <li>• Please arrive 15 minutes before showtime</li>
+            <li>• Present this ticket and a valid ID at the entrance</li>
+            <li>• No outside food or beverages allowed</li>
+            <li>• Tickets are non-refundable and non-transferable</li>
+          </ul>
+        </div>
+      </div>
     </div>
   );
 };
