@@ -1,4 +1,3 @@
-
 import { useEffect } from 'react';
 import { CheckCircle, Calendar, Clock, MapPin, Users, Ticket } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -45,28 +44,32 @@ export const BookingConfirmation = ({ movie, showtime, seats, onNewBooking, user
     const saveBooking = async () => {
       if (!user) return;
 
-      const { error } = await supabase
-        .from('bookings')
-        .insert({
-          user_id: user.id,
-          booking_id: bookingId,
-          movie_title: movie.title,
-          movie_genre: movie.genre,
-          showtime: showtime,
-          seats: seats,
-          total_amount: totalAmount,
-          cinema_location: 'PVR Forum Mall - Screen 1, Bangalore'
-        });
+      try {
+        const { error } = await supabase
+          .from('bookings')
+          .insert({
+            user_id: user.id,
+            booking_id: bookingId,
+            movie_title: movie.title,
+            movie_genre: movie.genre,
+            showtime: showtime,
+            seats: seats,
+            total_amount: totalAmount,
+            cinema_location: 'PVR Forum Mall - Screen 1, Bangalore'
+          });
 
-      if (error) {
-        console.error('Error saving booking:', error);
-        toast({
-          title: "Warning",
-          description: "Booking confirmed but failed to save to database",
-          variant: "destructive",
-        });
-      } else {
-        console.log('Booking saved successfully');
+        if (error) {
+          console.error('Error saving booking:', error);
+          toast({
+            title: "Warning",
+            description: "Booking confirmed but failed to save to database",
+            variant: "destructive",
+          });
+        } else {
+          console.log('Booking saved successfully');
+        }
+      } catch (error) {
+        console.error('Error in saveBooking:', error);
       }
     };
 

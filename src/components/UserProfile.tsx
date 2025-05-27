@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { User, Session } from '@supabase/supabase-js';
+import { User as UserType, Session } from '@supabase/supabase-js';
 import { 
   LogOut, 
   Ticket, 
@@ -17,7 +17,8 @@ import {
   MapPin, 
   Users,
   MessageSquare,
-  StarIcon
+  StarIcon,
+  UserIcon
 } from 'lucide-react';
 
 interface UserProfileProps {
@@ -47,7 +48,7 @@ interface Feedback {
 }
 
 export const UserProfile = ({ onLogout }: UserProfileProps) => {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<UserType | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [feedbacks, setFeedbacks] = useState<Feedback[]>([]);
@@ -81,40 +82,50 @@ export const UserProfile = ({ onLogout }: UserProfileProps) => {
   const fetchBookings = async () => {
     if (!user) return;
 
-    const { data, error } = await supabase
-      .from('bookings')
-      .select('*')
-      .eq('user_id', user.id)
-      .order('created_at', { ascending: false });
+    try {
+      const { data, error } = await supabase
+        .from('bookings')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
 
-    if (error) {
-      toast({
-        title: "Error",
-        description: "Failed to fetch bookings",
-        variant: "destructive",
-      });
-    } else {
-      setBookings(data || []);
+      if (error) {
+        console.error('Error fetching bookings:', error);
+        toast({
+          title: "Error",
+          description: "Failed to fetch bookings",
+          variant: "destructive",
+        });
+      } else {
+        setBookings(data || []);
+      }
+    } catch (error) {
+      console.error('Error in fetchBookings:', error);
     }
   };
 
   const fetchFeedbacks = async () => {
     if (!user) return;
 
-    const { data, error } = await supabase
-      .from('feedback')
-      .select('*')
-      .eq('user_id', user.id)
-      .order('created_at', { ascending: false });
+    try {
+      const { data, error } = await supabase
+        .from('feedback')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
 
-    if (error) {
-      toast({
-        title: "Error",
-        description: "Failed to fetch feedback",
-        variant: "destructive",
-      });
-    } else {
-      setFeedbacks(data || []);
+      if (error) {
+        console.error('Error fetching feedback:', error);
+        toast({
+          title: "Error",
+          description: "Failed to fetch feedback",
+          variant: "destructive",
+        });
+      } else {
+        setFeedbacks(data || []);
+      }
+    } catch (error) {
+      console.error('Error in fetchFeedbacks:', error);
     }
   };
 
@@ -136,28 +147,33 @@ export const UserProfile = ({ onLogout }: UserProfileProps) => {
 
     setIsSubmittingFeedback(true);
 
-    const { error } = await supabase
-      .from('feedback')
-      .insert({
-        user_id: user.id,
-        booking_id: newFeedback.bookingId,
-        rating: newFeedback.rating,
-        comments: newFeedback.comments
-      });
+    try {
+      const { error } = await supabase
+        .from('feedback')
+        .insert({
+          user_id: user.id,
+          booking_id: newFeedback.bookingId,
+          rating: newFeedback.rating,
+          comments: newFeedback.comments
+        });
 
-    if (error) {
-      toast({
-        title: "Error",
-        description: "Failed to submit feedback",
-        variant: "destructive",
-      });
-    } else {
-      toast({
-        title: "Success",
-        description: "Feedback submitted successfully!",
-      });
-      setNewFeedback({ rating: 5, comments: '', bookingId: '' });
-      fetchFeedbacks();
+      if (error) {
+        console.error('Error submitting feedback:', error);
+        toast({
+          title: "Error",
+          description: "Failed to submit feedback",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Success",
+          description: "Feedback submitted successfully!",
+        });
+        setNewFeedback({ rating: 5, comments: '', bookingId: '' });
+        fetchFeedbacks();
+      }
+    } catch (error) {
+      console.error('Error in submitFeedback:', error);
     }
 
     setIsSubmittingFeedback(false);
@@ -190,7 +206,7 @@ export const UserProfile = ({ onLogout }: UserProfileProps) => {
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center space-x-4">
             <div className="w-12 h-12 bg-gradient-to-r from-yellow-400 to-red-500 rounded-full flex items-center justify-center">
-              <User className="w-6 h-6 text-black" />
+              <UserIcon className="w-6 h-6 text-black" />
             </div>
             <div>
               <h1 className="text-3xl font-bold text-white">
